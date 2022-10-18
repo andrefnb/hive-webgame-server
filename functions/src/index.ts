@@ -1,3 +1,4 @@
+import { applicationDefault } from "firebase-admin/app";
 import * as firebase_functions from "firebase-functions";
 const firebase_admin = require("firebase-admin");
 
@@ -5,12 +6,8 @@ const firebase_admin = require("firebase-admin");
 // "npm --prefix \"$RESOURCE_DIR\" run lint",
 
 // Firebase setup
-
-let path_to_sa_key = "../../hive-webgame-firebase-adminsdk-p2nyv-052d7a54e1.json"
-let serviceAccount = require(path_to_sa_key);
-
 firebase_admin.initializeApp({
-    credential: firebase_admin.credential.cert(serviceAccount),
+    credential: applicationDefault(),
     databaseURL: 'https://hive-webgame.firebaseio.com'
 });
 
@@ -27,6 +24,7 @@ export const helloWorld = firebase_functions.region('europe-west1').https.onRequ
 
 export const match_create = firebase_functions.region('europe-west1').https.onRequest(async (request, response) => {
     try{
+        firebase_functions.logger.info("Match creation initiated");
         const matchesDb = admin_db.collection('matches');
         // generate id TODO
         let id = 1
