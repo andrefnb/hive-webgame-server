@@ -2,7 +2,6 @@ import { applicationDefault } from "firebase-admin/app";
 import * as firebase_functions from "firebase-functions";
 const firebase_admin = require("firebase-admin");
 
-
 // Add this in firebase.json, predeploy on top of the build line - to enable linter
 // "npm --prefix \"$RESOURCE_DIR\" run lint",
 
@@ -24,21 +23,22 @@ export const helloWorld = firebase_functions.region('europe-west1').https.onRequ
 });
 
 export const match_create = firebase_functions.region('europe-west1').https.onRequest(async (request, response) => {
-    try{
+    // try{
         firebase_functions.logger.log("Match creation initiated");
         const matchesDb = admin_db.collection('matches');
+        
         // generate id TODO
-        let id = 1
+        let id = 2
         let gameJson = {
             "hand_1": ["ant"]
         }
-        let match = await matchesDb.doc(id).set(gameJson);
+        let match = await matchesDb.doc(String(id)).set(gameJson);
 
-        firebase_functions.logger.log("Match created", {structuredData: true});
+        firebase_functions.logger.log("Match created");
         response.send(match);
-    } catch (error){
-        firebase_functions.logger.error(error)
-    }
+    // } catch (error){
+    //     firebase_functions.logger.error(error)
+    // }
 });
 
 
