@@ -13,6 +13,23 @@ firebase_admin.initializeApp({
 
 const admin_db = firebase_admin.firestore();
 
+const hand_start = {
+    "bees": 1,
+    "ants": 3,
+    "grasshopers": 3,
+    "spider": 2,
+    "beetle": 2,
+    "mosquitoes": 1,
+    "ladybug": 1,
+    "pillbug": 1
+}
+
+class Piece {
+
+    move(distanceInMeters: number = 0) {
+      console.log(`Animal moved ${distanceInMeters}m.`);
+    }
+  }
 
 // Start writing Firebase Functions
 // https://firebase.google.com/docs/functions/typescript
@@ -23,24 +40,35 @@ export const helloWorld = firebase_functions.region('europe-west1').https.onRequ
 });
 
 export const match_create = firebase_functions.region('europe-west1').https.onRequest(async (request, response) => {
-    // try{
-        firebase_functions.logger.log("Match creation initiated");
-        const matchesDb = admin_db.collection('matches');
-        
-        // generate id TODO
-        let id = 2
-        let gameJson = {
-            "hand_1": ["ant"]
-        }
-        let match = await matchesDb.doc(String(id)).set(gameJson);
+    
+    firebase_functions.logger.log("Match creation initiated");
+    const matchesDb = admin_db.collection('matches');
+    
+    // generate id TODO
+    let id = 3
+    let gameJson = {
+        "player_1": request.body.player_one_uid,
+        "player_2": request.body.player_two_uid,
+        "hand_1": JSON.parse(JSON.stringify(hand_start)),
+        "hand_2": JSON.parse(JSON.stringify(hand_start))
+    }
+    let match = await matchesDb.doc(String(id)).set(gameJson);
 
-        firebase_functions.logger.log("Match created");
-        response.send(match);
-    // } catch (error){
-    //     firebase_functions.logger.error(error)
-    // }
+    firebase_functions.logger.log("Match created");
+    response.send(match);
+
 });
 
+export const play_validation = firebase_functions.region('europe-west1').https.onRequest(async (request, response) => {
+    
+    // Validate play
+
+    // Get possible plays for each hand piece?
+
+        // Returns all possible positions
+        // Then, apply a filter for each kind of piece
+
+});
 
 // AUTH
 // Create
