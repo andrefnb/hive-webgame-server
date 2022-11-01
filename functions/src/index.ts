@@ -13,23 +13,23 @@ firebase_admin.initializeApp({
 
 const admin_db = firebase_admin.firestore();
 
-const hand_start = {
-    "bees": 1,
-    "ants": 3,
-    "grasshopers": 3,
-    "spider": 2,
-    "beetle": 2,
-    "mosquitoes": 1,
-    "ladybug": 1,
-    "pillbug": 1
-}
+const hand_start = [
+    {"piece":"bee", position:null},
+    {"piece":"ant", position:null},
+    {"piece":"ant", position:null},
+    {"piece":"ant", position:null},
+    {"piece":"grasshopper", position:null},
+    {"piece":"grasshopper", position:null},
+    {"piece":"grasshopper", position:null},
+    {"piece":"spider", position:null},
+    {"piece":"spider", position:null},
+    {"piece":"beetle", position:null},
+    {"piece":"beetle", position:null},
+    {"piece":"mosquito", position:null},
+    {"piece":"ladybug", position:null},
+    {"piece":"pillbug", position:null}
+]
 
-class Piece {
-
-    move(distanceInMeters: number = 0) {
-      console.log(`Animal moved ${distanceInMeters}m.`);
-    }
-  }
 
 // Start writing Firebase Functions
 // https://firebase.google.com/docs/functions/typescript
@@ -47,6 +47,7 @@ export const match_create = firebase_functions.region('europe-west1').https.onRe
     // generate id TODO
     let id = 3
     let gameJson = {
+        "n_pieces_in_play": 0,
         "player_1": request.body.player_one_uid,
         "player_2": request.body.player_two_uid,
         "hand_1": JSON.parse(JSON.stringify(hand_start)),
@@ -59,9 +60,56 @@ export const match_create = firebase_functions.region('europe-west1').https.onRe
 
 });
 
+// var axial_direction_vectors = [
+//     Hex(+1, 0), Hex(+1, -1), Hex(0, -1), 
+//     Hex(-1, 0), Hex(-1, +1), Hex(0, +1), 
+// ]
+
+// function axial_direction(direction):
+//     return axial_direction_vectors[direction]
+
+// function axial_add(hex, vec):
+//     return Hex(hex.q + vec.q, hex.r + vec.r)
+
+// function axial_neighbor(hex, direction):
+//     return axial_add(hex, axial_direction(direction))
+
+
+// Basic functions for hexagonal positions
+
+const q = 0
+const r = 1
+
+var axial_direction_vectors = [
+    [+1, 0], [+1, -1], [0, -1], [-1, 0], [-1, +1], [0, +1]
+]
+
+function axial_direction(direction: number): Array<number>{
+    return axial_direction_vectors[direction]
+}
+
+function axial_add(hex: Array<number>, vec: Array<number>): Array<number>{
+    return [hex[q] + vec[q], hex[r] + vec[r]]
+}
+
+function axial_neighbor(hex: Array<number>, direction: number): Array<number>{
+    return axial_add(hex, axial_direction(direction))
+}
+
 export const play_validation = firebase_functions.region('europe-west1').https.onRequest(async (request, response) => {
+
+    // Fetch game instance
+    const match = admin_db.collection('matches').doc(request.body.match_id);
     
     // Validate play
+    // TODO
+
+    var piece_obj = {}
+    // If first play, add position origin
+    if (match.n_pieces_in_play == 0){
+        // piece_obj["piece"] = request.body.piece,
+        // piece_obj["posotion"] = [0,0]
+    }
 
     // Get possible plays for each hand piece?
 
