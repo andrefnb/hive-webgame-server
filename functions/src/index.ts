@@ -13,21 +13,47 @@ firebase_admin.initializeApp({
 
 const admin_db = firebase_admin.firestore();
 
+export class Hex {
+    q: number;
+    r: number
+    constructor(q: number, r: number) {
+        this.q = q;
+        this.r = r;
+    }
+}
+
+export class Piece {
+    piece: string;
+    position: Hex | null;
+
+    constructor(piece: string, position: Hex | null) {
+        this.piece = piece;
+        this.position = position;
+    }
+
+    getPiece() : string {
+        return this.piece;
+    }
+    getPosition() : Hex | null {
+        return this.position;
+    }
+}
+
 const hand_start = [
-    {"piece":"bee", position:null},
-    {"piece":"ant", position:null},
-    {"piece":"ant", position:null},
-    {"piece":"ant", position:null},
-    {"piece":"grasshopper", position:null},
-    {"piece":"grasshopper", position:null},
-    {"piece":"grasshopper", position:null},
-    {"piece":"spider", position:null},
-    {"piece":"spider", position:null},
-    {"piece":"beetle", position:null},
-    {"piece":"beetle", position:null},
-    {"piece":"mosquito", position:null},
-    {"piece":"ladybug", position:null},
-    {"piece":"pillbug", position:null}
+    new Piece("bee", null),
+    new Piece("ant", null),
+    new Piece("ant", null),
+    new Piece("ant", null),
+    new Piece("grasshopper", null),
+    new Piece("grasshopper", null),
+    new Piece("grasshopper", null),
+    new Piece("spider", null),
+    new Piece("spider", null),
+    new Piece("beetle", null),
+    new Piece("beetle", null),
+    new Piece("mosquito", null),
+    new Piece("ladybug", null),
+    new Piece("pillbug", null)
 ]
 
 
@@ -104,11 +130,14 @@ export const play_validation = firebase_functions.region('europe-west1').https.o
     // Validate play
     // TODO
 
-    var piece_obj = {}
+    var piece_obj = {
+        piece: Object,
+        position: Array<number>
+    }
     // If first play, add position origin
     if (match.n_pieces_in_play == 0){
-        // piece_obj["piece"] = request.body.piece,
-        // piece_obj["posotion"] = [0,0]
+        // piece_obj["piece"] = request.body.piece
+        // piece_obj["position"] = [0,0]
     }
 
     // Get possible plays for each hand piece?
