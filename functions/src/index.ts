@@ -86,6 +86,14 @@ export const match_create = firebase_functions.region('europe-west1').https.onRe
 
 });
 
+export const get_match = firebase_functions.region('europe-west1').https.onRequest(async (request, response) => {
+    
+    const matchesDb = admin_db.collection('matches');
+    let match = await matchesDb.doc(String(request.body.match_id));
+    response.send(match);
+
+});
+
 // var axial_direction_vectors = [
 //     Hex(+1, 0), Hex(+1, -1), Hex(0, -1), 
 //     Hex(-1, 0), Hex(-1, +1), Hex(0, +1), 
@@ -103,47 +111,69 @@ export const match_create = firebase_functions.region('europe-west1').https.onRe
 
 // Basic functions for hexagonal positions
 
-const q = 0
-const r = 1
+// const q = 0
+// const r = 1
 
 var axial_direction_vectors = [
-    [+1, 0], [+1, -1], [0, -1], [-1, 0], [-1, +1], [0, +1]
+    new Hex(+1, 0), new Hex(+1, -1), new Hex(0, -1), new Hex(-1, 0), new Hex(-1, +1), new Hex(0, +1)
 ]
 
-function axial_direction(direction: number): Array<number>{
-    return axial_direction_vectors[direction]
+// function axial_direction(direction: number): Hex{
+//     return axial_direction_vectors[direction]
+// }
+
+function axial_add(hex: Hex, vec: Hex): Hex{
+    return new Hex(hex.q + vec.q, hex.r + vec.r)
 }
 
-function axial_add(hex: Array<number>, vec: Array<number>): Array<number>{
-    return [hex[q] + vec[q], hex[r] + vec[r]]
-}
+// function axial_neighbor(hex: Hex, direction: number): Hex{
+//     return axial_add(hex, axial_direction(direction))
+// }
 
-function axial_neighbor(hex: Array<number>, direction: number): Array<number>{
-    return axial_add(hex, axial_direction(direction))
-}
-
-export const play_validation = firebase_functions.region('europe-west1').https.onRequest(async (request, response) => {
+export const play = firebase_functions.region('europe-west1').https.onRequest(async (request, response) => {
 
     // Fetch game instance
     const match = admin_db.collection('matches').doc(request.body.match_id);
+
+    let request_body = request.body
+    let piece = request_body.piece
     
     // Validate play
     // TODO
+    
+    
 
-    var piece_obj = {
-        piece: Object,
-        position: Array<number>
-    }
     // If first play, add position origin
     if (match.n_pieces_in_play == 0){
-        // piece_obj["piece"] = request.body.piece
-        // piece_obj["position"] = [0,0]
+        piece.position = new Hex(0, 0)
+    } else if (match.n_pieces_in_play == 1) {
+        piece.position = axial_add(new Hex(0, 0), axial_direction_vectors[1])
+    } else {
+        piece.position = piece.position
     }
+
+    let hand_property = "hand_2"
+    if (request_body.is_first_player) {
+        hand_property = "hand_1"
+    }
+    let player_hand = match[hand_property]
+    player_hand[request_body.piece_index] = piece
 
     // Get possible plays for each hand piece?
 
         // Returns all possible positions
         // Then, apply a filter for each kind of piece
+    let hand_1 = match.hand_1
+    let hand_2 = player_hand
+    if (request_body.is_first_player) {
+        hand_1 = player_hand
+        hand_2 = match.hand_2
+    }
+
+    return admin_db.collection('matches').doc(request.body.match_id).set({
+        hand_1: hand_1,
+        hand_2: hand_2
+    })
 
 });
 
