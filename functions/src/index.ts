@@ -133,7 +133,24 @@ function axial_add(hex: Hex, vec: Hex): Hex{
 export const play = firebase_functions.region('europe-west1').https.onRequest(async (request, response) => {
 
     // Fetch game instance
-    const match = admin_db.collection('matches').doc(request.body.match_id);
+    let match = admin_db.collection('matches').doc(request.body.match_id);
+    // match = match.val()
+    // match.on('value', (match:any) => {
+    //     console.log(match.val());
+    //     firebase_functions.logger.log(match.val());
+    // }, (errorObject:any) => {
+    // console.log('The read failed: ' + errorObject.name);
+    // }); 
+
+    // let match_obj = match.get().then((doc: any) => {
+    //     firebase_functions.logger.log("ENTROU");
+    //     firebase_functions.logger.log(doc.data());
+    //     firebase_functions.logger.log(doc.data().hand_1);
+    // })
+    let match_obj = await match.get()
+    firebase_functions.logger.log(match_obj);
+    firebase_functions.logger.log(match_obj.data());
+    firebase_functions.logger.log(match_obj.data().hand_1);
 
     let request_body = request.body
     let piece = request_body.piece
@@ -141,24 +158,26 @@ export const play = firebase_functions.region('europe-west1').https.onRequest(as
     // Validate play
     // TODO
     
-    
-
+    firebase_functions.logger.log("test 1");
+    firebase_functions.logger.log(match);
     // If first play, add position origin
     if (match.n_pieces_in_play == 0){
+        firebase_functions.logger.log("entrou");
         piece.position = new Hex(0, 0)
     } else if (match.n_pieces_in_play == 1) {
         piece.position = axial_add(new Hex(0, 0), axial_direction_vectors[1])
     } else {
         piece.position = piece.position
     }
-
+    firebase_functions.logger.log("test 2");
     let hand_property = "hand_2"
     if (request_body.is_first_player) {
         hand_property = "hand_1"
     }
     let player_hand = match[hand_property]
+    firebase_functions.logger.log(piece);
     player_hand[request_body.piece_index] = piece
-
+    firebase_functions.logger.log("test 3");
     // Get possible plays for each hand piece?
 
         // Returns all possible positions
@@ -169,7 +188,7 @@ export const play = firebase_functions.region('europe-west1').https.onRequest(as
         hand_1 = player_hand
         hand_2 = match.hand_2
     }
-
+    firebase_functions.logger.log("test 4");
     return admin_db.collection('matches').doc(request.body.match_id).set({
         hand_1: hand_1,
         hand_2: hand_2
